@@ -3,7 +3,10 @@ import nodemailer from "nodemailer";
 const env = (k) => Netlify.env.get(k);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-export const mailReady = () => !!(env("MAIL_USER") && env("MAIL_PASS"));
+// sender login: SMTP_USER / SMTP_PASS are used if set, otherwise MAIL_USER / MAIL_PASS
+const mu = () => env("SMTP_USER") || env("MAIL_USER");
+const mp = () => env("SMTP_PASS") || env("MAIL_PASS");
+export const mailReady = () => !!(mu() && mp());
 export const smsReady = () => !!(env("TWILIO_SID") && env("TWILIO_TOKEN") && env("TWILIO_FROM"));
 
 // meeting time: saved by the browser as epoch ms (ts); older meetings fall back to text + TZ_OFFSET
@@ -21,8 +24,8 @@ const phone = (p) => {
 };
 
 export async function sendMail(to, subject, html) {
-  const tr = nodemailer.createTransport({ service: "gmail", auth: { user: env("MAIL_USER"), pass: env("MAIL_PASS") } });
-  await tr.sendMail({ from: `"NPD Portal" <${env("MAIL_USER")}>`, to: to.join(","), subject, html });
+  const tr = nodemailer.createTransport({ service: "gmail", auth: { user: mu(), pass: mp() } });
+  await tr.sendMail({ from: `"NPD Portal" <${mu()}>`, to: to.join(","), subject, html });
 }
 
 export async function sendSms(to, text) {
