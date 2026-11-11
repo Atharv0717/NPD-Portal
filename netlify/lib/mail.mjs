@@ -6,6 +6,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 // sender login: SMTP_USER / SMTP_PASS are used if set, otherwise MAIL_USER / MAIL_PASS
 const mu = () => env("SMTP_USER") || env("MAIL_USER");
 const mp = () => env("SMTP_PASS") || env("MAIL_PASS");
+export const mailFrom = () => mu() || "";
 export const mailReady = () => !!(mu() && mp());
 export const smsReady = () => !!(env("TWILIO_SID") && env("TWILIO_TOKEN") && env("TWILIO_FROM"));
 
@@ -15,8 +16,15 @@ export const when = (ts) =>
   new Date(ts).toLocaleString("en-IN", { timeZone: env("TIMEZONE") || "Asia/Kolkata", dateStyle: "full", timeStyle: "short" });
 
 // who gets the email: the user's own email (if switched on) + any extra emails typed in the meeting
+// + for the 2 built-in team logins (Supraman, Sachin): NOTIFY_CC (default both team emails), so both people get every team meeting notification
+const teamUsers = () => [env("ADMIN_USER") || "Supraman", env("USER2_USER") || "Sachin"].map((x) => String(x).toLowerCase());
+const teamCc = () => (env("NOTIFY_CC") ?? "sachinshetebs@gmail.com,atharvshete07@gmail.com").split(/[,;\s]+/);
 export const recipients = (m, user) =>
-  [...new Set([...(user && user.ne !== false ? [user.email] : []), ...(m.em || "").split(/[,;\s]+/)].filter((x) => /^\S+@\S+\.\S+$/.test(x || "")))];
+  [...new Set([
+    ...(user && user.ne !== false ? [user.email] : []),
+    ...(user && teamUsers().includes(String(user.u || "").toLowerCase()) ? teamCc() : []),
+    ...(m.em || "").split(/[,;\s]+/),
+  ].filter((x) => /^\S+@\S+\.\S+$/.test(x || "")))];
 
 const phone = (p) => {
   p = String(p || "").replace(/[\s\-()]/g, "");
