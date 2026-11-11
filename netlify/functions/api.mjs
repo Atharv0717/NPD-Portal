@@ -1,6 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
-import { mailReady, smsReady, recipients, sendMail, sendSms, sendMeetingMail } from "../lib/mail.mjs";
+import { mailReady, mailFrom, smsReady, recipients, sendMail, sendSms, sendMeetingMail } from "../lib/mail.mjs";
 
 const env = (k) => Netlify.env.get(k);
 const safe = (x) => /^[A-Za-z0-9]{1,40}$/.test(x || "");
@@ -146,7 +146,7 @@ export default async (req) => {
       const out = { email: "email service not set up", sms: "SMS service not set up (optional)" };
       if (mailReady()) {
         if (!user.email) out.email = "add your email first";
-        else try { await sendMail([user.email], "NPD Portal – test email", "<p>Your email reminders are working.</p>"); out.email = "sent to " + user.email; } catch (e) { out.email = "failed: " + e.message; }
+        else try { await sendMail([user.email], "NPD Portal – test email", "<p>Your email reminders are working.</p>"); out.email = "sent to " + user.email + " (sender: " + mailFrom() + ")"; } catch (e) { out.email = "failed (sender: " + mailFrom() + "): " + e.message; }
       }
       if (smsReady()) {
         if (!user.phone) out.sms = "add your mobile first";
