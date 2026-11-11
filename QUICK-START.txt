@@ -1,0 +1,45 @@
+NPD PORTAL - QUICK START (free: GitHub + Netlify + Gmail)
+
+FILES IN THIS ZIP (upload ALL of them, keep the folders)
+  public/index.html            the website (Sign in, Sign up, dashboard, meetings, Setup Guide page)
+  netlify/functions/api.mjs    login, sign up, private data per user, email test
+  netlify/functions/reminders.mjs   reminder timer (1 day + 2 hours before, every 10 minutes)
+  netlify/lib/mail.mjs         email + SMS sender
+  netlify.toml, package.json   Netlify settings
+  env-variables.txt            list of the settings to type in Netlify
+
+LOGIN
+  Built-in account (Sign in tab):  Username: Supraman   Password: Supraman@2026
+  Other people: Sign up tab (own username + password, own private workspace).
+  Change the password in Settings after the first login.
+
+A. GITHUB
+ 1. Unzip. You must see: public / netlify / netlify.toml / package.json
+ 2. github.com > New repository > npd-portal > Private > Create.
+ 3. "uploading an existing file" > drag ALL files AND folders > Commit changes.
+
+B. NETLIFY (free)
+ 1. app.netlify.com > Log in with GitHub.
+ 2. Add new site > Import an existing project > GitHub > npd-portal > Deploy.
+
+C. EMAIL (free, Gmail)
+ 1. Google Account > Security > 2-Step Verification ON.
+ 2. Security > App passwords > name "NPD Portal" > Create > copy the 16 letters.
+ 3. Netlify > Site configuration > Environment variables > Add (see env-variables.txt):
+      MAIL_USER = your Gmail      MAIL_PASS = 16 letters      SIGNUP_KEY = secret code (recommended)
+ 4. Deploys > Trigger deploy > Deploy site.
+
+D. CHECK
+ 1. Open the xxxx.netlify.app link > Sign in.
+ 2. Left menu > "Setup Guide" shows what is ready (server, email, SMS, sign-up code).
+ 3. Settings > add your email / mobile > "Send test email / SMS".
+ 4. Meetings > add a meeting: email on save, reminder 1 DAY before, reminder 2 HOURS before.
+
+E. ANOTHER PERSON / SEPARATE WEBSITE
+ - Same site: give them the link + SIGNUP_KEY; they use Sign up (private workspace).
+ - Fully separate website: deploy the same GitHub repo again as a 2nd Netlify site.
+
+F. SMS (optional, NOT free)  Twilio: TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM, SMS_COUNTRY(+91). Redeploy.
+   Then Settings > mobile > tick "SMS reminders".
+
+Do NOT drag-and-drop only the public folder: login and reminders need the netlify folder.

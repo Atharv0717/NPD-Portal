@@ -1,0 +1,21 @@
+NETLIFY ENVIRONMENT VARIABLES  (Site configuration > Environment variables > Add a variable)
+Redeploy after adding or changing any variable.
+
+REQUIRED FOR EMAIL REMINDERS
+  MAIL_USER     = yourname@gmail.com
+  MAIL_PASS     = 16-letter Gmail App Password (no spaces)
+
+RECOMMENDED
+  SIGNUP_KEY    = any secret code (people need it to Sign up)
+
+OPTIONAL
+  TIMEZONE      = Asia/Kolkata          (default)
+  TZ_OFFSET     = +05:30                (default)
+  ADMIN_USER    = Supraman              (built-in account, default)
+  ADMIN_PASS    = Supraman@2026         (built-in account, default - change it)
+  ADMIN_EMAIL   = your email for the built-in account
+  ALLOW_SIGNUP  = 0                     (turns Sign up off)
+  REQUIRE_LOGIN = 0                     (opens site without sign-in - not recommended)
+
+OPTIONAL SMS (Twilio - not free)
+  TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM (+number), SMS_COUNTRY (+91)
