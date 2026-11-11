@@ -23,16 +23,19 @@ export default async (req) => {
   try {
     let secret = await store.get("secret");
     if (!secret) { secret = crypto.randomBytes(32).toString("hex"); await store.set("secret", secret); }
-    // built-in login: created automatically the first time the site is opened (change with ADMIN_USER / ADMIN_PASS in Netlify)
+    // built-in logins: created automatically the first time the site is opened.
+    // Each person has their own private workspace and gets reminders at their own email.
     const su = String(env("ADMIN_USER") || "Supraman").toLowerCase();
-    if (!(await store.get(`users/${su}`))) {
+    const seeds = [
+      { u: su, name: env("ADMIN_NAME") || "Atharv Shete", email: env("ADMIN_EMAIL") || "atharvshete07@gmail.com", pw: env("ADMIN_PASS") || "Supraman@2026" },
+      { u: String(env("USER2_USER") || "Sachin").toLowerCase(), name: env("USER2_NAME") || "Sachin Shete", email: env("USER2_EMAIL") || "sachinshetebs@gmail.com", pw: env("USER2_PASS") || "Sachin@2026" },
+    ];
+    for (const sd of seeds) {
+      if (await store.get(`users/${sd.u}`)) continue;
       const first = (await store.list({ prefix: "users/" })).blobs.length === 0;
-      const seedUser = {
-        u: su, name: env("ADMIN_NAME") || "Supraman", role: "Manager", dept: "", email: env("ADMIN_EMAIL") || "", phone: "",
-        h: hashPw(env("ADMIN_PASS") || "Supraman@2026"), ne: true, ns: false, at: Date.now(),
-      };
-      if (first) { const old = await store.get("db", { type: "json" }); if (old) { delete old.users; await store.setJSON(`u/${su}/db`, old); seedUser.legacy = true; } }
-      await store.setJSON(`users/${su}`, seedUser);
+      const seedUser = { u: sd.u, name: sd.name, role: "Manager", dept: "", email: sd.email, phone: "", h: hashPw(sd.pw), ne: true, ns: false, at: Date.now() };
+      if (first) { const old = await store.get("db", { type: "json" }); if (old) { delete old.users; await store.setJSON(`u/${sd.u}/db`, old); seedUser.legacy = true; } }
+      await store.setJSON(`users/${sd.u}`, seedUser);
     }
     const sign = (u) => {
       const a = Buffer.from(JSON.stringify({ u, exp: Date.now() + 30 * 864e5 })).toString("base64url");
