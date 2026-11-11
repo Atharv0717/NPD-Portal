@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NPD Portal</title>
+<style>
+:root{--bg:#f4f3ee;--card:#fff;--side:#faf9f5;--ink:#1f2328;--mute:#6b7280;--line:#e2e0d8;--acc:#0b7a9e;--acc2:#e3f1f6;--warn:#b4561b}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1b19;--card:#262522;--side:#201f1d;--ink:#ece9e1;--mute:#a09d94;--line:#3a3935;--acc:#4cb8da;--acc2:#1d3a45;--warn:#e89358}}
+*{box-sizing:border-box}
+body{margin:0;display:flex;min-height:100vh;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+h1{font-size:24px;margin:0 0 16px}h2{font-size:16px;margin:0 0 10px}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-width:0}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:600}
+button.sm{padding:5px 11px;font-size:13px}
+button.x{background:transparent;color:var(--warn);padding:2px 8px;font-size:20px}
+button.g{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+aside{width:240px;flex:none;position:sticky;top:0;height:100vh;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px}
+aside nav a{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;cursor:pointer;margin-bottom:2px}
+aside nav a:hover{background:var(--acc2)}
+aside nav a.on{background:#1565c0;color:#fff;font-weight:600}aside nav a.on .badge{background:#fff;color:#1565c0}.so{margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}.so button{width:100%;background:#1565c0;color:#fff;padding:10px 16px}.so button:hover{background:#0d47a1}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:10px 8px;border-top:1px solid var(--line)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.me b{display:block;font-size:14px;line-height:1.2}.me small{color:var(--mute);display:block;line-height:1.3}
+.badge{background:var(--warn);color:#fff;border-radius:9px;padding:0 7px;font-size:12px}
+main{width:100%;padding:24px;max-width:1150px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 0 var(--line),0 8px 20px -14px rgba(0,0,0,.3)}
+.stats .card{cursor:pointer;transition:transform .12s}.stats .card:hover{border-color:var(--acc);transform:translateY(-2px)}
+.stats small{color:var(--mute)}.stats b{display:block;font-size:28px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px;background:var(--card)}
+.seg button{background:transparent;color:var(--ink);border-radius:0;font-weight:500}.seg button.on{background:var(--acc);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.row>*{flex:1 1 140px}.row>button{flex:0 0 auto}
+.item{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.item>div{flex:1;min-width:0;overflow-wrap:anywhere}.item small,.mute{color:var(--mute)}
+.pb{border-top:1px solid var(--line);padding:4px 0 4px}.pb>.item:not(:first-child){margin-left:16px}
+.tag{font-size:12px;background:var(--acc2);color:var(--acc);border-radius:4px;padding:1px 7px;margin-right:4px}
+.tag.w{background:transparent;color:var(--warn);border:1px solid var(--warn)}
+#vw,#dlg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:30;display:flex;align-items:center;justify-content:center;padding:12px}
+#pop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:12px}#pop[hidden],#vw[hidden],#dlg[hidden],#toast[hidden]{display:none}#pop h2{border-left:5px solid #1565c0;padding-left:10px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:11px 18px;border-radius:10px;z-index:40;max-width:90vw}
+.col{flex:1;min-width:0;display:flex;flex-direction:column}
+#top{position:sticky;top:0;z-index:8;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 24px}
+#top{background:linear-gradient(90deg,#0b7a9e 0%,#4f5bd5 50%,#d6457f 100%);border-bottom:0;color:#fff;box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}#top b{display:block;font-size:17px;line-height:1.2;color:#fff}#top small{color:rgba(255,255,255,.85)}#top .sy{margin-left:auto;margin-right:4px;font-size:12px;color:rgba(255,255,255,.9)}#top .av{background:#fff;color:#4f5bd5}
+.vb{background:var(--card);border-radius:12px;width:min(1100px,100%);max-height:94vh;display:flex;flex-direction:column}
+.vh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+#vc{overflow:auto;padding:12px}#vc img,#vc video{max-width:100%;max-height:78vh;display:block;margin:auto}
+.cfg td{padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}#vc table{border-collapse:collapse;font-size:13px;margin-bottom:16px}#vc td,#vc th{border:1px solid var(--line);padding:4px 8px}
+#login{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:14px}
+#login[hidden]{display:none}
+#ab{width:min(400px,100%);display:grid;gap:12px;padding:26px;max-height:100vh;overflow:auto}
+.af{display:grid;gap:12px}.af[hidden],.af label[hidden]{display:none}
+.af label{display:grid;gap:5px;font-weight:600}.af label.chk{display:flex;gap:8px;align-items:center;font-weight:400}
+.af input[type=checkbox]{width:18px;height:18px;padding:0}
+.stats .tile b{font-size:34px;color:var(--acc)}.stats .tile h2{margin:2px 0 4px}
+.qa button{padding:11px 18px}
+details.pj{border-top:1px solid var(--line);padding:10px 0}details.pj summary{cursor:pointer;font-size:16px}
+@media(max-width:800px){#top{padding:8px 14px}#top .sy{display:none}body{flex-direction:column}aside{width:auto;height:auto;position:static;flex-direction:row;padding:8px;border:0;border-bottom:1px solid var(--line)}aside nav{display:flex;overflow-x:auto;flex:1}.so{margin:0 0 0 8px;padding:0;border:0}.so button{width:auto;padding:9px 14px}aside nav a{white-space:nowrap;gap:6px}.me{display:none}main{padding:14px}.cols{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="login" hidden><div id="ab" class="card"><h1 style="font-size:24px;margin:0">NPD Portal</h1><p class="mute" style="margin:0">Mahle · New Product Development</p>
+<div class="seg" id="tabs" style="display:flex;margin:0"><button id="tu" style="flex:1" onclick="authTab('up')">Sign up</button><button id="ti" style="flex:1" onclick="authTab('in')">Sign in</button></div>
+<div id="sf" class="af" onkeydown="if(event.key==='Enter')doSignUp()"><small class="mute">Every user gets a private workspace. Nobody else can see your projects, documents or meetings.</small>
+<label>Full name<input id="sn" autocomplete="name"></label>
+<label>Role / designation<input id="sr" placeholder="Manager"></label>
+<label>Department<input id="sdp" placeholder="Manufacturing Engineering Department"></label>
+<label>Email (meeting reminders)<input id="sem" type="email" autocomplete="email"></label>
+<label>Mobile for SMS (optional, e.g. +919876543210)<input id="sph" type="tel" autocomplete="tel"></label>
+<label>Username<input id="su" autocomplete="username" autocapitalize="none" autocorrect="off"></label>
+<label>Password (at least 6 characters)<input id="sp" type="password" autocomplete="new-password"></label>
+<label>Confirm password<input id="sp2" type="password" autocomplete="new-password"></label>
+<label id="sinvw" hidden>Invite code (given by your admin)<input id="sinv"></label>
+<label class="chk"><input type="checkbox" onchange="$('#sp').type=$('#sp2').type=this.checked?'text':'password'"> Show password</label>
+<button type="button" onclick="doSignUp()">Create account</button><small id="se" style="color:var(--warn)"></small></div>
+<div id="lf2" class="af" hidden onkeydown="if(event.key==='Enter')doSignIn()"><label>Username<input id="lu" autocomplete="username" autocapitalize="none" autocorrect="off"></label>
+<label>Password<input id="lp" type="password" autocomplete="current-password"></label>
+<label class="chk"><input type="checkbox" onchange="$('#lp').type=this.checked?'text':'password'"> Show password</label>
+<label class="chk"><input type="checkbox" id="lk" checked> Keep me signed in on this device</label>
+<button type="button" onclick="doSignIn()">Sign in</button><small id="le" style="color:var(--warn)"></small></div><small id="sw" style="color:var(--warn)"></small></div></div>
+<aside id="side"></aside><div class="col"><header id="top"></header><main id="main"><p class="mute">Loading…</p></main></div>
+<div id="dlg" hidden><div class="vb" style="max-width:380px;padding:18px"><p id="dm" style="margin-top:0"></p><div class="row" style="margin:0"><button id="dy">Yes, delete</button><button class="g" id="dn">Cancel</button></div></div></div><div id="toast" hidden></div><div id="pop" hidden><div class="vb" style="max-width:460px;padding:18px"><h2 id="pt" style="font-size:19px"></h2><div id="pc2" style="overflow:auto;max-height:60vh"></div><div class="row" style="margin:12px 0 0"><button onclick="$('#pop').hidden=true">OK</button></div></div></div>
+<div id="vw" hidden><div class="vb"><div class="vh"><b id="vt"></b><span><button class="sm g" id="vd">Download</button> <button class="sm" onclick="closeV()">Close</button></span></div><div id="vc"></div></div></div>
+<script>
+const K='npdv3',CH=4*1024*1024,CATS=['Cost Optimization','Automation','Digitalization','Man Power Optimization','Other'];
+const P={name:'Sachin Shete',role:'Manager',dept:'Manufacturing Engineering Department'};
+const GROUPS={'Drawing':['Product Drawing','Component Drawing','Fixture Drawing','Tooling Drawing','Gauge Drawing','AutoCAD Drawing','Other Diagram','Other Drawing Details'],
+'Process & Other Details Documents':['PFD (Process Flow Diagram)','PFMEA (Process Failure Mode Effect Analysis)','Control Plan','Process Sheet','Other Details']};
+const PAGES=[['dash','NPD Dashboard'],['proj','Projects'],['docs','Documents'],['comm','Communication'],['meet','Meetings'],['set','Settings'],['setup','Setup Guide']];
+const SUGG=[[1,'09:00','Weekly production planning review','Line load, shift roster and gaps'],[1,'11:00','NPD project status – customer projects','Milestones, risks, next actions'],[2,'10:00','Cost optimization review','Savings tracker and approvals'],[3,'10:00','Automation and digitalization review','Progress, vendor and budget'],[3,'14:00','Customer communication follow-up','Open queries, replies due'],[4,'10:00','Man power optimization and shift planning','Skills, overtime, leave cover'],[4,'14:00','PFMEA and Control Plan review','Process risks and updates'],[5,'10:00','Fixture, tooling and gauge status','Drawings, calibration, readiness'],[5,'15:00','Weekly report and next-week plan','Summary to management']];
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function note(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(note.t);note.t=setTimeout(()=>t.hidden=true,3500)}
+function popup(t,h){$('#pt').textContent=t;$('#pc2').innerHTML=h;$('#pop').hidden=false}
+const mli=(a,pr)=>a.map(m=>`<div class="item"><div><b>${e(m.title)}</b> <span class="tag">${mt(m)=='mahle'?'Mahle':'Customer'}</span> <small>${e(cn(m.c))}${m.p?' · '+e(pn(m.p)):''}</small><br><small>${fd(m.at)}</small>${m.g?'<br>'+e(m.g):''}${pr?'<br><small style="color:var(--warn)"><b>Please prepare for this meeting.</b></small>':''}</div></div>`).join('');
+function remind(){if(!D||!$('#login').hidden)return;let seen={};try{seen=JSON.parse(localStorage.npdrem||'{}')}catch(x){}const n=Date.now(),T=m=>+new Date(m.at),
+ C=[['m','Starting within 15 minutes',n-3e5,n+9e5],['h','Within 2 hours',n+9e5,n+72e5],['d','Within 24 hours – please prepare',n+72e5,n+864e5]],
+ got=C.map(([k,t,a,b])=>[k,t,D.meet.filter(m=>T(m)>a&&T(m)<=b&&!seen[k+m.id+m.at])]).filter(x=>x[2].length);if(!got.length)return;
+ got.forEach(([k,t,L])=>L.forEach(m=>seen[k+m.id+m.at]=1));try{localStorage.npdrem=JSON.stringify(seen)}catch(x){}
+ popup('Meeting alert – '+got[0][1],got.map(([k,t,L])=>'<h2>'+t+'</h2>'+mli(L,1)).join(''));
+ try{if(Notification.permission=='granted')got.forEach(([k,t,L])=>L.forEach(m=>new Notification('Meeting: '+m.title,{body:fd(m.at)+' – '+t})))}catch(x){}}
+function ask(m){return new Promise(ok=>{$('#dm').textContent=m;$('#dlg').hidden=false;$('#dy').onclick=()=>{$('#dlg').hidden=true;ok(true)};$('#dn').onclick=()=>{$('#dlg').hidden=true;ok(false)}})}
+const $=s=>document.querySelector(s),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const v=id=>(($('#'+id)||{}).value||'').trim();
+let ME={name:P.name,role:P.role},D,CLOUD=true,TOKEN='',CFG={},SRV=0,last='',LW=0,V='dash',S={tab:'mahle',dt:'mahle',o:{},c:'',p:'',me:''};
+try{TOKEN=localStorage.npdtok||sessionStorage.npdtok||''}catch(x){}
+const ld=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(x){return null}};
+const norm=d=>{d=d||{};['cust','proj','comm','meet','docs','log','trash'].forEach(k=>d[k]=d[k]||[]);d.photos=d.photos||{};d.users=d.users||[];
+ if(!d.seeded){d.seeded=1;if(!d.cust.length){d.cust.push({id:'mahle',name:'Mahle',d:'Mahle project'});CATS.forEach((k,i)=>d.proj.push({id:'p'+i,c:'mahle',n:'Mahle – '+k,k,s:'Planned',d:''}))}}return d};
+const cn=id=>(D.cust.find(c=>c.id==id)||{name:'—'}).name,pn=id=>(D.proj.find(p=>p.id==id)||{n:'General'}).n;
+const mt=m=>m.ty||(m.c=='mahle'?'mahle':'cust'),mcust=t=>D.cust.filter(c=>t=='mahle'?c.id=='mahle':c.id!='mahle');
+const opts=(a,s)=>a.map(x=>`<option value="${e(x.id)}"${x.id==s?' selected':''}>${e(x.name)}</option>`).join('');
+const fd=d=>new Date(d).toLocaleString([], {dateStyle:'medium',timeStyle:'short'});
+const sz=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const lg=(d,m)=>{d.log.unshift({t:Date.now(),m});d.log.length=Math.min(d.log.length,30)};
+/* storage: shared cloud (Netlify function) if available, else this browser */
+async function api(m,p,b,raw){const r=await fetch('/api/'+p,{method:m,headers:{authorization:'Bearer '+TOKEN,...(b!==undefined&&!raw?{'content-type':'application/json'}:{})},body:b===undefined?undefined:raw?b:JSON.stringify(b)});
+ if(r.status==401&&p!='login'&&p!='signup'){logout();throw new Error('Signed out')}
+ if(!r.ok)throw new Error((await r.text())||r.status);return r}
+const idb=new Promise(r=>{try{const q=indexedDB.open('npd-files',1);q.onupgradeneeded=()=>q.result.createObjectStore('f',{keyPath:'id'});q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(x){r(null)}});
+const tx=async(m,fn)=>{const d=await idb;if(!d)throw new Error('Browser storage is blocked');return new Promise((res,rej)=>{const t=d.transaction('f',m),q=fn(t.objectStore('f'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)})};
+async function persist(){if(CLOUD){LW=Date.now();await api('PUT','db',D);last=JSON.stringify(D);LW=Date.now()}else localStorage.setItem(K,JSON.stringify(D))}
+async function mut(fn){if(CLOUD){try{D=norm(await(await api('GET','db')).json())}catch(x){}}fn(D);try{await persist()}catch(x){note('Could not save: '+x.message)}go(V,1)}
+async function blob(f){if(!CLOUD){const r=await tx('readonly',s=>s.get(f.id));return r&&r.b}
+ const ps=[];for(let i=0;i<f.n;i++)ps.push(await(await api('GET',`chunk/${f.id}/${i}`)).arrayBuffer());return new Blob(ps,{type:f.t})}
+async function rmBlob(f){try{if(CLOUD)await api('DELETE',`file/${f.id}?n=${f.n}`);else await tx('readwrite',s=>s.delete(f.id))}catch(x){}}
+async function dl(id){const f=D.docs.find(x=>x.id==id),b=await blob(f);if(!b)return note('File not found.');const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click()}
+/* notifications */
+const soon=()=>{const n=Date.now();return D.meet.filter(m=>{const t=+new Date(m.at);return t>=n-36e5&&t<=n+3*864e5}).sort((a,b)=>a.at<b.at?-1:1)};
+const alerts=()=>soon().map(m=>{const h=(new Date(m.at)-Date.now())/36e5;return `<div class="item"><div><b>${e(m.title)}</b> <span class="tag">${mt(m)=='mahle'?'Mahle':'Customer'}</span> <small>${e(cn(m.c))}${m.p?' · '+e(pn(m.p)):''}</small><br><small>${fd(m.at)}</small>${m.g?'<br>'+e(m.g):''}${h<24?'<br><small style="color:var(--warn)"><b>Please prepare for this meeting.</b></small>':''}</div><span class="tag w">${h<1?'Now':h<2?'Within 2h':h<24?'Within 24h':'Soon'}</span></div>`}).join('')||'<p class="mute">No meeting alerts in the next 3 days.</p>';
+const changes=n=>D.log.slice(0,n).map(x=>`<div class="item"><div>${e(x.m)}<br><small>${fd(x.t)}</small></div></div>`).join('')||'<p class="mute">No changes yet.</p>';
+const drow=(f,h='')=>`<div class="item"><div><b style="cursor:pointer" title="Open" onclick="view('${f.id}')">${e(f.name)}</b><br><small>${[h.includes('c')?'':e(cn(f.c)),h.includes('p')?'':e(pn(f.p)),h.includes('s')?'':e(f.s),sz(f.size),new Date(f.at).toLocaleDateString(),f.note?e(f.note):''].filter(Boolean).join(' · ')}</small></div><button class="sm" onclick="view('${f.id}')">View</button><button class="sm g" onclick="dl('${f.id}')">Download</button><button class="x" title="Delete" onclick="delFile('${f.id}')">×</button></div>`;
+const openDocs=(c,p)=>{S.dt=c=='mahle'?'mahle':'cust';S.o[p||'g_'+c]=true;go('docs')};
+const mrow=(m,tr)=>{const past=new Date(m.at)<new Date();return `<div class="item"><div><b>${e(m.title)}</b> <span class="tag">${mt(m)=='mahle'?'Mahle':'Customer'}</span> <small>${e(cn(m.c))}${m.p?' · '+e(pn(m.p)):''}</small><br><small>${fd(m.at)}${m.was?' (rescheduled from '+fd(m.was)+')':''}${tr?' · deleted '+fd(m.del):''}${m.em?' · ✉ '+e(m.em):''}</small>${m.g?'<br>'+e(m.g):''}</div>${tr?`<span class="tag w">Deleted</span><button class="sm" onclick="restM('${m.id}')">Restore</button><button class="sm g" onclick="purgeM('${m.id}')">Delete forever</button>`:`<span class="tag${past?'':' w'}">${past?'Past':'Upcoming'}</span><button class="sm" onclick="editM('${m.id}')">Edit</button><button class="sm g" onclick="delM('${m.id}')">Delete</button>`}</div>`};
+const projBlock=p=>{const F=D.docs.filter(f=>f.p==p.id),M=D.meet.filter(m=>m.p==p.id);
+ return `<div class="pb"><div class="item" style="border:0"><div><b>${e(p.n)}</b> <span class="tag">${e(p.k)}</span><span class="tag w">${e(p.s)}</span><br><small>${F.length} documents · ${M.length} meetings${p.d?' · '+e(p.d):''}</small></div><button class="sm" onclick="openDocs('${p.c}','${p.id}')">Documents</button><button class="x" title="Delete project" onclick="delProj('${p.id}')">×</button></div>${F.map(f=>drow(f,'cp')).join('')}${M.map(m=>`<div class="item"><div><small>Meeting: <b>${e(m.title)}</b> · ${fd(m.at)}</small></div></div>`).join('')}</div>`};
+const projForm=(cid,list)=>`<div class="row">${cid?'':`<select id="pc">${opts(list,S.c)}</select>`}<input id="pn" placeholder="Project name"></div><div class="row"><select id="pk">${CATS.map(c=>`<option>${c}</option>`).join('')}</select><select id="ps"><option>Planned</option><option>In progress</option><option>On hold</option><option>Completed</option></select></div><div class="row"><textarea id="pd" rows="2" placeholder="Other details" style="flex:1 1 100%"></textarea><button onclick="addProj(${cid?"'"+cid+"'":''})">Add project</button></div>`;
+const docBlock=(c,p)=>{const k=p?p.id:'g_'+c.id,F=D.docs.filter(f=>f.c==c.id&&(p?f.p==p.id:!f.p));
+ return `<details class="pj"${S.o[k]?' open':''} ontoggle="S.o['${k}']=this.open"><summary><b>${e(p?p.n:'General documents (no project)')}</b> <span class="tag">${F.length} documents</span></summary>
+<div class="row" style="margin-top:10px"><select id="fsec_${k}">${Object.entries(GROUPS).map(([g,a])=>`<optgroup label="${g}">${a.map(x=>`<option>${e(x)}</option>`).join('')}</optgroup>`).join('')}</select><input id="fn_${k}" placeholder="Note (optional)"><input type="file" id="ff_${k}" multiple><button onclick="upload('${k}','${c.id}','${p?p.id:''}')">Upload</button></div><small class="mute" id="ust_${k}">PDF, Excel, Word, PowerPoint, AutoCAD, images, videos and any other file.</small>
+<div class="cols" style="margin-top:10px">${Object.entries(GROUPS).map(([g,a])=>`<div><h2>${g}</h2>${a.map(s=>{const L=F.filter(f=>f.s==s).sort((a,b)=>b.at-a.at);return `<div style="margin-bottom:10px"><b>${e(s)}</b> <span class="tag">${L.length}</span>${L.map(f=>drow(f,'cps')).join('')}</div>`}).join('')}</div>`).join('')}</div></details>`};
+const VIEWS={
+dash(){const hr=new Date().getHours(),gr=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+ const tiles=[['Projects',D.proj.length,'Mahle and customer projects',"go('proj')"],['Documents',D.docs.length,'Drawings, PFD, PFMEA, Control Plans',"go('docs')"],['Meetings',D.meet.length,'Mahle '+D.meet.filter(m=>mt(m)=='mahle').length+' · Customer '+D.meet.filter(m=>mt(m)=='cust').length,"go('meet')"],['Communication',D.comm.length,'Customer messages and notes',"go('comm')"]];
+ const qa=[['+ Add meeting',"go('meet');setTimeout(()=>$('#tt').focus(),50)"],['+ Upload document',"S.dt='mahle';go('docs')"],['+ Add project',"S.tab='mahle';go('proj')"],['+ Add customer',"S.tab='cust';go('proj')"]];
+ return `<h1>${gr}, ${e(ME.name.split(' ')[0])}</h1><p class="mute" style="margin-top:-10px">${new Date().toLocaleDateString([], {weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${D.cust.length} customers</p>
+<div class="row qa">${qa.map(([t,c])=>`<button onclick="${c}">${t}</button>`).join('')}</div>
+<div class="stats">${tiles.map(([a,b,h,c])=>`<div class="card tile" onclick="${c}"><b>${b}</b><h2>${a}</h2><small>${h}</small></div>`).join('')}</div>
+<div class="cols"><div class="card"><h2>Notifications ${soon().length?`<span class="badge">${soon().length}</span>`:''}</h2>${alerts()}</div><div class="card"><h2>Changes made in the website</h2>${changes(12)}</div></div>`},
+proj(){const mahle=D.cust.find(c=>c.id=='mahle'),others=D.cust.filter(c=>c.id!='mahle'),m=S.tab=='mahle';
+ const seg=`<h1>Projects</h1><div class="seg"><button class="${m?'on':''}" onclick="S.tab='mahle';go('proj',1)">1. Mahle Projects</button><button class="${m?'':'on'}" onclick="S.tab='cust';go('proj',1)">2. Customer Projects</button></div>`;
+ if(m){if(!mahle)return seg+'<div class="card"><button onclick="addMahle()">Add Mahle</button></div>';
+  return seg+`<div class="card" style="margin-bottom:16px"><h2>Add Mahle project</h2>${projForm('mahle')}</div><div class="card"><h2>Mahle projects – documents and meetings under each</h2>${D.proj.filter(p=>p.c=='mahle').map(projBlock).join('')||'<p class="mute">No projects yet.</p>'}</div>`}
+ return seg+`<div class="cols"><div class="card"><h2>Add customer</h2><div class="row"><input id="cn" placeholder="Customer name"><input id="cd" placeholder="Contact / details"><button onclick="addCust()">Add customer</button></div></div><div class="card"><h2>Add customer project</h2>${others.length?projForm('',others):'<p class="mute">Add a customer first.</p>'}</div></div>
+${others.map(c=>`<div class="card" style="margin-bottom:12px"><div class="item" style="border:0"><div><h2 style="margin:0">${e(c.name)}</h2><small>${e(c.d)}</small></div><button class="sm" onclick="openDocs('${c.id}')">All documents</button><button class="x" title="Delete customer" onclick="delCust('${c.id}')">×</button></div>${D.proj.filter(p=>p.c==c.id).map(projBlock).join('')||'<p class="mute">No projects yet.</p>'}</div>`).join('')}`},
+docs(){const m=S.dt=='mahle',mc=D.cust.find(c=>c.id=='mahle');
+ const tabs=`<h1>Documents</h1><div class="seg"><button class="${m?'on':''}" onclick="S.dt='mahle';go('docs',1)">1. Mahle Project Documents</button><button class="${m?'':'on'}" onclick="S.dt='cust';go('docs',1)">2. Customer Project Documents</button></div>`;
+ if(m){if(!mc)return tabs+'<div class="card">Add Mahle in Projects first.</div>';return tabs+`<div class="card"><h2>Mahle projects – separate documents for each project</h2>${D.proj.filter(p=>p.c=='mahle').map(p=>docBlock(mc,p)).join('')+docBlock(mc,null)}</div>`}
+ const others=D.cust.filter(c=>c.id!='mahle');
+ return tabs+(others.map(c=>`<div class="card" style="margin-bottom:12px"><h2>${e(c.name)} – separate documents for each project</h2>${D.proj.filter(p=>p.c==c.id).map(p=>docBlock(c,p)).join('')+docBlock(c,null)}</div>`).join('')||'<div class="card mute">Add a customer in Projects, Customer Projects first.</div>')},
+setup(){const ok=(b,y,n)=>b?`<span style="color:#1a7f37">&#10003; ${y}</span>`:`<span style="color:var(--warn)">&#10007; ${n}</span>`;
+return `<h1>Setup Guide</h1><div class="cols"><div class="card"><h2>Status of this website</h2>
+<p>${ok(SRV,'Server (login + storage + reminders) is running','Server not found - deploy the WHOLE folder from GitHub on Netlify')}</p>
+<p>${ok(CFG.mail,'Email reminders ready (MAIL_USER + MAIL_PASS set)','Email not set up - add MAIL_USER and MAIL_PASS in Netlify')}</p>
+<p>${ok(CFG.sms,'SMS ready (Twilio set)','SMS not set up (optional, not free)')}</p>
+<p>${ok(CFG.invite,'Sign up needs an invite code (SIGNUP_KEY set)','Anyone with the link can sign up - set SIGNUP_KEY to restrict')}</p>
+<p>Reminders: <b>1 day</b> and <b>2 hours</b> before every meeting, checked every 10 minutes. Time zone: <b>${e(CFG.tz||'Asia/Kolkata')}</b>.</p></div>
+<div class="card"><h2>Steps (free: GitHub + Netlify + Gmail)</h2><ol>
+<li>GitHub: New repository (Private) &rarr; upload ALL files and folders of the zip (public, netlify, netlify.toml, package.json).</li>
+<li>Netlify: Add new site &rarr; Import from GitHub &rarr; choose the repository &rarr; Deploy.</li>
+<li>Google Account &rarr; Security &rarr; 2-Step Verification ON &rarr; App passwords &rarr; create &rarr; copy 16 letters.</li>
+<li>Netlify &rarr; Site configuration &rarr; Environment variables &rarr; add the variables below.</li>
+<li>Deploys &rarr; Trigger deploy &rarr; Deploy site.</li>
+<li>Open the site, sign in, then Settings &rarr; add email / mobile &rarr; Send test email / SMS.</li></ol></div></div>
+<div class="card" style="margin-top:16px"><h2>Netlify environment variables</h2><div style="overflow-x:auto"><table class="cfg" style="border-collapse:collapse;width:100%">
+<tr><td><b>MAIL_USER</b></td><td>Gmail address that sends reminders (required for email)</td></tr>
+<tr><td><b>MAIL_PASS</b></td><td>Gmail App Password, 16 letters, no spaces (required for email)</td></tr>
+<tr><td><b>SIGNUP_KEY</b></td><td>Secret invite code for Sign up (recommended)</td></tr>
+<tr><td><b>TIMEZONE</b></td><td>Default Asia/Kolkata</td></tr>
+<tr><td><b>TZ_OFFSET</b></td><td>Default +05:30</td></tr>
+<tr><td><b>TWILIO_SID / TWILIO_TOKEN / TWILIO_FROM</b></td><td>Optional SMS (Twilio, not free). SMS_COUNTRY default +91</td></tr>
+<tr><td><b>ADMIN_USER / ADMIN_PASS / ADMIN_EMAIL</b></td><td>Built-in account (default Supraman). Created once on a new site</td></tr>
+<tr><td><b>ALLOW_SIGNUP</b></td><td>Set 0 to turn Sign up off</td></tr>
+<tr><td><b>REQUIRE_LOGIN</b></td><td>Set 0 only to open the site without sign-in (not recommended)</td></tr></table></div>
+<small class="mute">After adding or changing a variable, redeploy the site.</small></div>`},
+set(){const m=ME;return `<h1>Settings</h1><div class="cols"><div class="card"><h2>My profile and reminders</h2><div class="af"><label>Full name<input id="stn" value="${e(m.name)}"></label><label>Role<input id="str" value="${e(m.role)}"></label><label>Department<input id="std" value="${e(m.dept)}"></label>
+<label>Email for reminders<input id="ste" type="email" value="${e(m.email)}"></label><label>Mobile for SMS (with country code, e.g. +919876543210)<input id="stp" value="${e(m.phone)}"></label>
+<label class="chk"><input type="checkbox" id="stne"${m.ne?' checked':''}> Email reminders – 1 day and 2 hours before each meeting</label><label class="chk"><input type="checkbox" id="stns"${m.ns?' checked':''}> SMS reminders – 1 day and 2 hours before each meeting</label>
+<div class="row"><button onclick="saveProf()">Save</button><button class="g" onclick="testNote()">Send test email / SMS</button></div>
+<small class="mute">${CFG.mail?'Email service: ready.':'Email service: not set up yet (see README).'} ${CFG.sms?'SMS service: ready.':'SMS service: not set up (optional).'}</small></div></div>
+<div class="card"><h2>Change password</h2><div class="af"><label>Current password<input id="po" type="password" autocomplete="current-password"></label><label>New password (at least 6 characters)<input id="pw" type="password" autocomplete="new-password"></label><div><button onclick="chgPass()">Change password</button></div></div></div></div>`},
+comm(){return `<h1>Communication</h1><div class="card" style="margin-bottom:16px"><div class="row"><select id="mc">${opts(D.cust,S.c)}</select><input id="ms" placeholder="Subject"></div>
+<div class="row"><textarea id="mm" rows="3" placeholder="Message / call notes / email summary" style="flex:1 1 100%"></textarea><button onclick="addComm()">Save entry</button></div></div>
+<div class="card">${D.comm.slice().reverse().map(c=>`<div class="item"><div><b>${e(c.s)}</b> <small>${e(cn(c.c))} · ${fd(c.at)}</small><br>${e(c.m)}</div><button class="x" onclick="delItem('comm','${c.id}')">×</button></div>`).join('')||'<p class="mute">No communication logged yet.</p>'}</div>`},
+meet(){const E=S.me?D.meet.find(m=>m.id==S.me):null,ty=E?mt(E):(S.mty||'mahle'),cs=mcust(ty),cc=E?E.c:(cs[0]||{}).id,
+ L=t=>D.meet.filter(m=>mt(m)==t).sort((a,b)=>a.at<b.at?-1:1),
+ card=(t,h)=>{const a=L(t);return `<div class="card"><h2>${h} (${a.length})</h2>${a.length?`<div class="row"><button class="g" onclick="delPast('${t}')">Delete past</button><button class="g" onclick="delAllM('${t}')">Delete all</button></div>`:''}${a.map(x=>mrow(x)).join('')||'<p class="mute">No meetings.</p>'}</div>`};
+ return `<h1>Meetings</h1><div class="cols"><div class="card"><h2>${E?'Edit / reschedule meeting':'Schedule a meeting'}</h2>
+<div class="row"><select id="tty" onchange="S.mty=this.value;fillM()"><option value="mahle"${ty=='mahle'?' selected':''}>Mahle Meeting</option><option value="cust"${ty=='cust'?' selected':''}>Customer Meeting</option></select><select id="tc" onchange="fillM(1)">${opts(cs,cc)}</select></div>
+<div class="row"><select id="tp"><option value="">No project</option>${opts(D.proj.filter(p=>p.c==cc).map(p=>({id:p.id,name:p.n})),E&&E.p)}</select><input id="tem" placeholder="Email to (optional, comma separated)" value="${e(E?E.em:'')}"></div>
+<div class="row"><input id="tt" placeholder="Meeting title" value="${e(E?E.title:'')}"><input id="ta" type="datetime-local" value="${E?e(E.at):''}"></div>
+<div class="row"><textarea id="tg" rows="2" placeholder="Agenda" style="flex:1 1 100%">${e(E?E.g:'')}</textarea><button onclick="saveMeet()">${E?'Save changes':'Add meeting'}</button>${E?`<button class="g" onclick="S.me='';go('meet',1)">Cancel</button>`:''}</div>
+<small class="mute">An email with the schedule is sent when you save. Email / SMS reminders go out 1 day and 2 hours before the meeting (set your email and mobile in Settings).</small></div>
+<div class="card"><h2>Notifications</h2>${alerts()}</div></div>
+<div class="cols">${card('mahle','1. Mahle Meetings')}${card('cust','2. Customer Meetings')}</div>
+<div class="card" style="margin-bottom:16px"><h2>Deleted meetings (${D.trash.length})</h2>${D.trash.length?'<div class="row"><button onclick="emptyTrash()">Empty deleted meetings (delete all forever)</button><button class="g" onclick="restAll()">Restore all</button></div>':''}${D.trash.map(m=>mrow(m,1)).join('')||'<p class="mute">Deleted meetings appear here, and you can restore them.</p>'}</div>
+<div class="card"><h2>Suggested weekly schedule for ${e(ME.name)}</h2><div class="row"><button onclick="addSugg(0,1)">Add the full week</button></div>${SUGG.map((x,i)=>`<div class="item"><div><b>${DAYS[x[0]]} ${x[1]} – ${x[2]}</b><br><small>${x[3]}</small></div><button class="sm" onclick="addSugg(${i})">Add</button></div>`).join('')}</div>`}};
+/* actions */
+const addMahle=()=>mut(d=>{if(!d.cust.find(c=>c.id=='mahle'))d.cust.push({id:'mahle',name:'Mahle',d:'Mahle project'})});
+const addCust=()=>{if(!v('cn'))return;const o={id:uid(),name:v('cn'),d:v('cd')};S.c=o.id;mut(d=>{d.cust.push(o);lg(d,'Customer added: '+o.name)})};
+async function delCust(id){if(!await ask('Delete this customer with all projects, meetings, messages and documents?'))return;for(const f of D.docs.filter(f=>f.c==id))await rmBlob(f);
+ mut(d=>{d.cust=d.cust.filter(c=>c.id!=id);['proj','comm','meet','docs'].forEach(k=>d[k]=d[k].filter(x=>x.c!=id))})}
+const addProj=cid=>{const c=cid||v('pc');if(!c||!v('pn'))return note('Choose a customer and enter a project name.');const o={id:uid(),c,n:v('pn'),k:v('pk'),s:v('ps'),d:v('pd')};mut(d=>{d.proj.push(o);lg(d,'Project added: '+o.n)})};
+const delProj=async id=>{if(await ask('Delete this project? Its documents stay under General.'))mut(d=>{d.proj=d.proj.filter(p=>p.id!=id);d.docs.forEach(f=>{if(f.p==id)f.p=''})})};
+const addComm=()=>{if(!v('mc')||!v('ms'))return note('Choose a customer and enter a subject.');const o={id:uid(),c:v('mc'),s:v('ms'),m:v('mm'),at:Date.now()};mut(d=>{d.comm.push(o);lg(d,'Message logged: '+o.s)})};
+const delItem=(k,id)=>mut(d=>{d[k]=d[k].filter(x=>x.id!=id)});
+const editM=id=>{S.me=id;go('meet')};
+function fillM(k){const t=v('tty');if(!k)$('#tc').innerHTML=opts(mcust(t),'');const c=v('tc');$('#tp').innerHTML='<option value="">No project</option>'+opts(D.proj.filter(p=>p.c==c).map(p=>({id:p.id,name:p.n})),'')}
+function saveMeet(){const o={ty:v('tty'),c:v('tc'),p:v('tp'),title:v('tt'),at:v('ta'),g:v('tg'),em:v('tem')};if(!o.c)return note('Add a customer first (Projects > Customer Projects).');if(!o.title||!o.at)return note('Enter the meeting title and date/time.');o.ts=+new Date(o.at);const id=S.me;S.me='';
+ const was=!!id;return mut(d=>{const m=id&&d.meet.find(x=>x.id==id);if(m){if(m.at!=o.at){m.was=m.at;lg(d,`Meeting rescheduled: ${o.title} → ${fd(o.at)}`)}else lg(d,'Meeting updated: '+o.title);Object.assign(m,o)}else{d.meet.push({id:uid(),...o});lg(d,`Meeting scheduled: ${o.title} – ${fd(o.at)}`)}}).then(async()=>{popup(was?'Meeting updated':'Meeting scheduled',mli([o]));
+  if(!CLOUD)return note('Saved. Emails need the Netlify website (see README).');
+  try{await api('POST','mail',{m:o,k:was?'updated':'scheduled'});note('Email sent with the meeting schedule.')}catch(x){note('Meeting saved. Email not sent: '+x.message)}})}
+const delM=id=>mut(d=>{const m=d.meet.find(x=>x.id==id);if(!m)return;d.meet=d.meet.filter(x=>x.id!=id);d.trash.unshift({...m,del:Date.now()});lg(d,'Meeting deleted: '+m.title)});
+const restM=id=>mut(d=>{const m=d.trash.find(x=>x.id==id);if(!m)return;d.trash=d.trash.filter(x=>x.id!=id);delete m.del;d.meet.push(m);lg(d,'Meeting restored: '+m.title)});
+const purgeM=id=>mut(d=>{const m=d.trash.find(x=>x.id==id);d.trash=d.trash.filter(x=>x.id!=id);if(m)lg(d,'Meeting deleted forever: '+m.title)});
+const emptyTrash=()=>mut(d=>{const n=d.trash.length;d.trash=[];lg(d,n+' deleted meetings removed forever')});
+const restAll=()=>mut(d=>{d.trash.forEach(m=>{delete m.del;d.meet.push(m)});lg(d,d.trash.length+' meetings restored');d.trash=[]});
+const delAllM=t=>mut(d=>{const a=d.meet.filter(m=>mt(m)==t);d.meet=d.meet.filter(m=>mt(m)!=t);d.trash.unshift(...a.map(m=>({...m,del:Date.now()})));lg(d,a.length+' meetings deleted')});
+const delPast=t=>mut(d=>{const now=new Date(),old=d.meet.filter(m=>mt(m)==t&&new Date(m.at)<now);d.meet=d.meet.filter(m=>!(mt(m)==t&&new Date(m.at)<now));d.trash.unshift(...old.map(m=>({...m,del:Date.now()})));lg(d,old.length+' past meetings deleted')});
+function nextAt(d,t){const x=new Date(),[h,m]=t.split(':');x.setHours(+h,+m,0,0);while(x.getDay()!=d||x<new Date())x.setDate(x.getDate()+1);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16)}
+const addSugg=(i,all)=>{const c=D.cust[0];if(!c)return note('Add a customer first.');mut(d=>{(all?SUGG:[SUGG[i]]).forEach(([w,t,n,g])=>{const at=nextAt(w,t);d.meet.push({id:uid(),c:c.id,p:'',ty:'mahle',title:n,at,ts:+new Date(at),g})});lg(d,'Suggested schedule added')})};
+async function upload(k,c,p){const L=[...($('#ff_'+k).files||[])];if(!L.length)return note('Choose at least one file.');const sec=v('fsec_'+k),nt=v('fn_'+k),M=[];S.o[k]=true;
+ try{for(const f of L){const id=uid(),n=Math.max(1,Math.ceil(f.size/CH));$('#ust_'+k).textContent=`Uploading ${f.name}…`;
+  if(CLOUD){for(let i=0;i<n;i++)await api('PUT',`chunk/${id}/${i}`,f.slice(i*CH,(i+1)*CH),1)}else await tx('readwrite',s=>s.put({id,b:f}));
+  M.push({id,c,p,g:Object.keys(GROUPS).find(g=>GROUPS[g].includes(sec)),s:sec,name:f.name,t:f.type||'application/octet-stream',size:f.size,note:nt,at:Date.now(),n})}
+ await mut(d=>{d.docs.push(...M);lg(d,`${M.length} document(s) uploaded: ${cn(c)}${p?' / '+pn(p):''} – ${sec}`)});
+  popup('Document uploaded successfully',`<p style="margin-top:0">${M.length} file(s) saved to <b>${e(cn(c))}${p?' – '+e(pn(p)):''}</b> under <b>${e(sec)}</b>.</p>`+M.map(f=>`<div class="item"><div><b>${e(f.name)}</b><br><small>${sz(f.size)}</small></div></div>`).join(''))}catch(x){note('Upload failed: '+x.message);popup('Upload failed','<p>'+e(x.message)+'</p><p class="mute">Check your internet and the access key, then try again.</p>')}}
+async function delFile(id){const f=D.docs.find(x=>x.id==id);if(!f||!await ask('Delete '+f.name+'?'))return;await rmBlob(f);mut(d=>{d.docs=d.docs.filter(x=>x.id!=id);lg(d,'Document deleted: '+f.name)})}
+/* viewer */
+const closeV=()=>{$('#vw').hidden=true;$('#vc').innerHTML=''};
+const loadJS=(u,k)=>window[k]?Promise.resolve():new Promise((ok,no)=>{const t=document.createElement('script');t.src=u;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
+const CDN='https://cdnjs.cloudflare.com/ajax/libs/';
+async function showPdf(b0,c,u){try{await loadJS(CDN+'pdf.js/3.11.174/pdf.min.js','pdfjsLib');pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'pdf.js/3.11.174/pdf.worker.min.js';
+ const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await b0.arrayBuffer())}).promise;c.innerHTML='';
+ for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),w=Math.min(c.clientWidth-24,1000),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:w/v0.width*(devicePixelRatio>1?1.5:1)}),cv=document.createElement('canvas');
+  cv.width=vp.width;cv.height=vp.height;cv.style.cssText=`width:100%;max-width:${w}px;display:block;margin:0 auto 10px;border:1px solid var(--line)`;c.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise}}
+ catch(x){c.innerHTML=`<iframe src="${u}" title="PDF" style="width:100%;height:78vh;border:0"></iframe><p class="mute">Could not load the PDF viewer (internet needed). Use Download if nothing shows.</p>`}}
+async function view(id){const f=D.docs.find(x=>x.id==id),c=$('#vc'),n=f.name.toLowerCase(),t=f.t||'';$('#vt').textContent=f.name;$('#vd').onclick=()=>dl(id);$('#vw').hidden=false;c.textContent='Loading…';
+ const b0=await blob(f);if(!b0){c.textContent='File not found.';return}
+ const pdf=n.endsWith('.pdf'),u=URL.createObjectURL(new Blob([b0],{type:pdf?'application/pdf':t}));
+ try{if(t.startsWith('image')||/\.(png|jpe?g|gif|webp|bmp|svg)$/.test(n))c.innerHTML=`<img src="${u}" alt="">`;
+ else if(t.startsWith('video')||/\.(mp4|webm|mov|m4v)$/.test(n))c.innerHTML=`<video src="${u}" controls autoplay playsinline></video>`;
+ else if(pdf)await showPdf(b0,c,u);
+ else if(/\.(xlsx|xlsm|xls|csv)$/.test(n)){await loadJS(CDN+'xlsx/0.18.5/xlsx.full.min.js','XLSX');const w=XLSX.read(await b0.arrayBuffer());c.innerHTML=w.SheetNames.map(k=>`<h2>${e(k)}</h2>`+XLSX.utils.sheet_to_html(w.Sheets[k],{header:'',footer:''})).join('')}
+ else if(n.endsWith('.docx')){await loadJS(CDN+'mammoth/1.6.0/mammoth.browser.min.js','mammoth');c.innerHTML=(await mammoth.convertToHtml({arrayBuffer:await b0.arrayBuffer()})).value||'<p>Empty document.</p>'}
+ else if(n.endsWith('.pptx')){await loadJS(CDN+'jszip/3.10.1/jszip.min.js','JSZip');const z=await JSZip.loadAsync(await b0.arrayBuffer()),ks=Object.keys(z.files).filter(k=>/^ppt\/slides\/slide\d+\.xml$/.test(k)).sort((a,b)=>a.match(/slide(\d+)/)[1]-b.match(/slide(\d+)/)[1]);let h='<p class="mute">Text of each slide. Use Download to open the full design in PowerPoint.</p>';
+  for(let i=0;i<ks.length;i++){const x=await z.file(ks[i]).async('string');h+=`<div class="card" style="margin-bottom:10px"><h2>Slide ${i+1}</h2>${[...x.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>`<div>${m[1]}</div>`).join('')}</div>`}c.innerHTML=h}
+ else if(/\.(mp3|wav|m4a|ogg|aac)$/.test(n)||t.startsWith('audio'))c.innerHTML=`<audio src="${u}" controls autoplay style="width:100%"></audio>`;
+ else if(/\.(txt|log|json|xml|md|ini|yaml|yml|js|py|java|html|htm|css|sql|sh|cfg|conf)$/.test(n)||t.startsWith('text/')){const x=await b0.text();c.innerHTML='<pre style="white-space:pre-wrap;word-break:break-word;margin:0">'+e(x.slice(0,300000))+'</pre>'+(x.length>300000?'<p class="mute">Showing the first part. Use Download for the full file.</p>':'')}
+ else if(/\.(dwg|dxf)$/.test(n))c.innerHTML='<p>AutoCAD files (.dwg / .dxf) open in AutoCAD or Autodesk Viewer. Use Download.</p>';
+ else c.innerHTML='<p>This file type cannot be previewed in the browser. Use Download to open it.</p>'}
+ catch(x){c.innerHTML='<p>Could not preview this file (internet is needed for the viewers). Use Download.</p>'}}
+addEventListener('keydown',ev=>{if(ev.key==='Escape')closeV()});
+/* shell */
+function go(p,keep){V=p;const n=soon().length,ini=ME.name.split(' ').map(w=>w[0]).join('');
+ $('#top').innerHTML=`<div class="av">${e(ini)}</div><div><b>${e(ME.name)}</b><small>${e([ME.role,ME.dept].filter(Boolean).join(' · '))}</small></div><span class="sy">Private workspace · ${e(ME.u||'')}</span>`;
+ $('#side').innerHTML=`<nav>${PAGES.map(([k,t])=>`<a class="${k==p?'on':''}" onclick="go('${k}')">${t}${k=='meet'&&n?`<span class="badge">${n}</span>`:''}</a>`).join('')}</nav><div class="so"><button onclick="logout()">Sign out</button></div>`;
+ try{$('#main').innerHTML=VIEWS[p]();}catch(x){$('#main').innerHTML='<div class="card">Something went wrong: '+e(x.message)+'</div>'}if(!keep)scrollTo(0,0)}
+const keepTok=(t,keep)=>{TOKEN=t;try{(keep?localStorage:sessionStorage).npdtok=t;localStorage.npdseen=1}catch(x){}};
+const logout=()=>{try{localStorage.removeItem('npdtok');sessionStorage.removeItem('npdtok')}catch(x){}location.reload()};
+async function enter(me){ME=me;try{const raw=await(await api('GET','db')).text();D=norm(JSON.parse(raw));last=raw}catch(x){return note('Could not load your data: '+x.message)}
+ $('#login').hidden=true;go('dash');try{if(window.Notification&&Notification.permission=='default')Notification.requestPermission()}catch(x){}setTimeout(remind,1500)}
+async function init(){
+ try{const r=await fetch('/api/config');if(!(r.headers.get('content-type')||'').includes('json'))throw 0;CFG=await r.json();SRV=1}catch(x){$('#sw').textContent='Server not found. Deploy the whole folder from GitHub on Netlify (not only the public folder) – see README.'}
+ $('#sinvw').hidden=!CFG.invite;
+ if(SRV&&TOKEN){try{await enter(await(await api('GET','me')).json())}catch(x){}}
+ if(SRV&&CFG.open&&!D){try{const j=await(await api('POST','auto',{})).json();keepTok(j.token,true);await enter(j.me)}catch(x){}}
+ if(CFG.open){const st=document.createElement('style');st.textContent='.so{display:none!important}';document.head.appendChild(st)}
+ if(CFG.signup===false){$('#tu').hidden=true;$('#ti').style.flex='1'}
+ if(!D)$('#login').hidden=false;
+ setInterval(remind,30000);
+ setInterval(async()=>{if(!D||document.hidden||!$('#vw').hidden||Date.now()-LW<45000)return;try{const raw=await(await api('GET','db')).text();if(raw!==last){last=raw;D=norm(JSON.parse(raw));if(!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))go(V,1)}}catch(x){}},20000)}
+function authTab(t){$('#sf').hidden=t!='up';$('#lf2').hidden=t!='in';$('#tu').className=t=='up'?'on':'';$('#ti').className=t=='in'?'on':''}
+async function doSignUp(){const er=$('#se');er.style.color='var(--warn)';er.textContent='';if(!SRV)return er.textContent=$('#sw').textContent||'Server not found.';
+ const b={name:v('sn'),role:v('sr'),dept:v('sdp'),email:v('sem'),phone:v('sph'),username:v('su').toLowerCase(),password:$('#sp').value,invite:v('sinv')};
+ if(b.name.length<2)return er.textContent='Enter your full name.';
+ if(!/^\S+@\S+\.\S+$/.test(b.email))return er.textContent='Enter a valid email (used for meeting reminders).';
+ if(!/^[a-z0-9_.]{3,30}$/.test(b.username))return er.textContent='Username: at least 3 letters, numbers, dot or underscore.';
+ if(b.password.length<6)return er.textContent='Password must be at least 6 characters.';
+ if(b.password!==$('#sp2').value)return er.textContent='The two passwords do not match.';
+ try{const j=await(await api('POST','signup',b)).json();keepTok(j.token,true);await enter(j.me)}catch(x){er.textContent=x.message}}
+async function doSignIn(){const le=$('#le');le.style.color='var(--warn)';le.textContent='';if(!SRV)return le.textContent=$('#sw').textContent||'Server not found.';
+ try{const j=await(await api('POST','login',{username:v('lu').toLowerCase(),password:$('#lp').value})).json();keepTok(j.token,$('#lk').checked);await enter(j.me)}catch(x){le.textContent=x.message}}
+async function saveProf(){try{ME=await(await api('POST','profile',{name:v('stn'),role:v('str'),dept:v('std'),email:v('ste'),phone:v('stp'),ne:$('#stne').checked,ns:$('#stns').checked})).json();note('Saved.');go('set',1)}catch(x){note(x.message)}}
+async function testNote(){await saveProf();try{const o=await(await api('POST','test',{})).json();popup('Test result','<p><b>Email:</b> '+e(o.email)+'</p><p><b>SMS:</b> '+e(o.sms)+'</p>')}catch(x){note(x.message)}}
+async function chgPass(){try{await api('POST','password',{old:$('#po').value,pw:$('#pw').value});$('#po').value=$('#pw').value='';note('Password changed.')}catch(x){note(x.message)}}
+authTab('in');try{if(!$('#lu').value)$('#lu').value='Supraman'}catch(x){}
+init();
+</script>
+</body>
+</html>
