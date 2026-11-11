@@ -27,8 +27,8 @@ export default async (req) => {
     // Each person has their own private workspace and gets reminders at their own email.
     const su = String(env("ADMIN_USER") || "Supraman").toLowerCase();
     const seeds = [
-      { u: su, name: env("ADMIN_NAME") || "Atharv Shete", email: env("ADMIN_EMAIL") || "atharvshete07@gmail.com", pw: env("ADMIN_PASS") || "Supraman@2026" },
-      { u: String(env("USER2_USER") || "Sachin").toLowerCase(), name: env("USER2_NAME") || "Sachin Shete", email: env("USER2_EMAIL") || "sachinshetebs@gmail.com", pw: env("USER2_PASS") || "Sachin@2026" },
+      { u: su, name: env("ADMIN_NAME") || "Atharv Shete", email: env("ADMIN_EMAIL") || "", pw: env("ADMIN_PASS") || "Supraman@2026" },
+      { u: String(env("USER2_USER") || "Sachin").toLowerCase(), name: env("USER2_NAME") || "Sachin Shete", email: env("USER2_EMAIL") || "", pw: env("USER2_PASS") || "Sachin@2026" },
     ];
     for (const sd of seeds) {
       if (await store.get(`users/${sd.u}`)) continue;
