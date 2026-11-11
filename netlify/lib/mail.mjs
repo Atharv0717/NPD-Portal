@@ -4,9 +4,13 @@ const env = (k) => Netlify.env.get(k);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 // sender login: SMTP_USER / SMTP_PASS are used if set, otherwise MAIL_USER / MAIL_PASS
-const mu = () => env("SMTP_USER") || env("MAIL_USER");
-const mp = () => env("SMTP_PASS") || env("MAIL_PASS");
-export const mailFrom = () => mu() || "";
+const mu = () => String(env("SMTP_USER") || env("MAIL_USER") || "").trim();
+// spaces are removed from the password automatically (Google shows the App Password as 4 groups of 4 letters)
+const mp = () => String(env("SMTP_PASS") || env("MAIL_PASS") || "").replace(/\s+/g, "");
+// optional: a different "From" address (needed for Brevo etc.)
+const mf = () => String(env("MAIL_FROM") || mu()).trim();
+const from = () => env("MAIL_FROM") || mu();
+export const mailFrom = () => (from() || "") + " via " + (env("SMTP_HOST") || "gmail");
 export const mailReady = () => !!(mu() && mp());
 export const smsReady = () => !!(env("TWILIO_SID") && env("TWILIO_TOKEN") && env("TWILIO_FROM"));
 
@@ -16,9 +20,9 @@ export const when = (ts) =>
   new Date(ts).toLocaleString("en-IN", { timeZone: env("TIMEZONE") || "Asia/Kolkata", dateStyle: "full", timeStyle: "short" });
 
 // who gets the email: the user's own email (if switched on) + any extra emails typed in the meeting
-// + for the 2 built-in team logins (Supraman, Sachin): NOTIFY_CC (default both team emails), so both people get every team meeting notification
+// + for the 2 built-in team logins (Supraman, Sachin): NOTIFY_CC (set in NOTIFY_CC), so both people get every team meeting notification
 const teamUsers = () => [env("ADMIN_USER") || "Supraman", env("USER2_USER") || "Sachin"].map((x) => String(x).toLowerCase());
-const teamCc = () => (env("NOTIFY_CC") ?? "sachinshetebs@gmail.com,atharvshete07@gmail.com").split(/[,;\s]+/);
+const teamCc = () => String(env("NOTIFY_CC") || "").split(/[,;\s]+/);
 export const recipients = (m, user) =>
   [...new Set([
     ...(user && user.ne !== false ? [user.email] : []),
@@ -31,9 +35,22 @@ const phone = (p) => {
   return /^\d{10}$/.test(p) ? (env("SMS_COUNTRY") || "+91") + p : p;
 };
 
+// SMTP_HOST set (e.g. smtp-relay.brevo.com) = any SMTP service; not set = Gmail
+const transport = () => {
+  const port = +(env("SMTP_PORT") || 587);
+  return env("SMTP_HOST")
+    ? nodemailer.createTransport({ host: env("SMTP_HOST"), port, secure: port === 465, auth: { user: mu(), pass: mp() } })
+    : nodemailer.createTransport({ service: "gmail", auth: { user: mu(), pass: mp() } });
+};
+
 export async function sendMail(to, subject, html) {
-  const tr = nodemailer.createTransport({ service: "gmail", auth: { user: mu(), pass: mp() } });
-  await tr.sendMail({ from: `"NPD Portal" <${mu()}>`, to: to.join(","), subject, html });
+  // default: Gmail. Backup: any SMTP service (e.g. Brevo free) by setting SMTP_HOST (+ SMTP_PORT)
+  const host = env("SMTP_HOST");
+  const port = Number(env("SMTP_PORT") || 587);
+  const tr = nodemailer.createTransport(
+    host ? { host, port, secure: port === 465, auth: { user: mu(), pass: mp() } } : { service: "gmail", auth: { user: mu(), pass: mp() } }
+  );
+  await tr.sendMail({ from: `"NPD Portal" <${mf()}>`, to: to.join(","), subject, html });
 }
 
 export async function sendSms(to, text) {
